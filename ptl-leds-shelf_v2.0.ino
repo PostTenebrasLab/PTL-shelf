@@ -19,14 +19,12 @@
 #include <Arduino.h>
 #include <U8g2lib.h>
 
-#include <WiFi.h>
-
+//#include <WiFi.h>
 #include <FastLED.h>
 #include <PubSubClient.h>
 
 #include "ptl-leds-shelf.h"
 #include "secret.h"
-
 
 // Define the array of leds
 //CRGB leds[NUM_STRIPS][NUM_LEDS_PER_STRIP];
@@ -43,25 +41,7 @@ U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /* clock=*/ 15, /* data=*/ 4, 
 
 WiFiClient wiFiClient;
 
-void callback(char *topic, byte *payload, unsigned int length);
-
 PubSubClient mqttClient(mqttServer, mqttPort, callback, wiFiClient);
-
-void callback(char *topic, byte *payload, unsigned int length) {
-    // In order to republish this payload, a copy must be made
-    // as the orignal payload buffer will be overwritten whilst
-    // constructing the PUBLISH packet.
-
-    // Allocate the correct amount of memory for the payload copy
-    byte *p = (byte *) malloc(length);
-    // Copy the payload to the new buffer
-    memcpy(p, payload, length);
-    mqttClient.publish("hello/world_exit", "Hello from ESP33");
-    mqttClient.publish("hello/world_exit", p, length);
-    Serial.println("Hello from callback Leds");
-    // Free the memory
-    free(p);
-}
 
 
 void setup() {
@@ -81,6 +61,9 @@ void setup() {
     Serial.println();
     Serial.print("Connecting to ");
     Serial.println(ssid);
+    u8g2.clearBuffer();
+    u8g2.drawStr(0, 10, "PTL's leds shelf V2.0");
+    u8g2.sendBuffer();
 
     WiFi.begin(ssid, password);
 
@@ -103,6 +86,14 @@ void setup() {
         if (mqttClient.connect("ESP32Client", mqttUser, mqttPassword)) {
 
             Serial.println("connected to MQTT");
+            Serial.println("Subscribed to ");
+
+            mqttClient.subscribe(TOPIC_ALL);
+            mqttClient.subscribe(TOPIC_LINES);
+            mqttClient.subscribe(TOPIC_COLUMNS);
+            mqttClient.subscribe(TOPIC_MASK);
+            mqttClient.subscribe(TOPIC_STATE);
+
         } else {
 
             Serial.print("failed with state ");
@@ -111,7 +102,6 @@ void setup() {
         }
     }
 
-    mqttClient.subscribe("hello/world");
 
     FastLED.addLeds<WS2812B, DATA_PIN_STRIP0, RGB>(strip0, NUM_LEDS_PER_STRIP);
     FastLED.addLeds<WS2812B, DATA_PIN_STRIP1, RGB>(strip1, NUM_LEDS_PER_STRIP);
@@ -125,43 +115,16 @@ void setup() {
 
 void loop() {
 
+    int e;
 
-    // put your main code here, to run repeatedly:
-    u8g2.clearBuffer();                    // clear the internal memory
-    u8g2.drawStr(0, 10, "PTL's leds shelf V2.0");    // write something to the internal memory
-    u8g2.sendBuffer();                    // transfer internal memory to the display
-//    delay(20);
-
-    renderLeds();
     mqttClient.loop();
 
+    e = update_state(state, buffer);
+    if(e == 0)
+        update_leds();
+
+//    test_leds();
+
 }
 
-void renderLeds() {
-    long ms = millis() % 2000;
 
-    if (ms < 1000) {
-        fill_solid(strip0, NUM_LEDS_PER_STRIP, CRGB::Red);
-        fill_solid(strip1, NUM_LEDS_PER_STRIP, CRGB::Blue);
-        fill_solid(strip2, NUM_LEDS_PER_STRIP, CRGB::Red);
-        fill_solid(strip3, NUM_LEDS_PER_STRIP, CRGB::Blue);
-        fill_solid(strip4, NUM_LEDS_PER_STRIP, CRGB::Red);
-        fill_solid(strip5, NUM_LEDS_PER_STRIP, CRGB::Blue);
-        fill_solid(strip6, NUM_LEDS_PER_STRIP, CRGB::Red);
-        fill_solid(strip7, NUM_LEDS_PER_STRIP, CRGB::Blue);
-
-    } else {
-        fill_solid(strip0, NUM_LEDS_PER_STRIP, CRGB::Blue);
-        fill_solid(strip1, NUM_LEDS_PER_STRIP, CRGB::Red);
-        fill_solid(strip2, NUM_LEDS_PER_STRIP, CRGB::Blue);
-        fill_solid(strip3, NUM_LEDS_PER_STRIP, CRGB::Red);
-        fill_solid(strip4, NUM_LEDS_PER_STRIP, CRGB::Blue);
-        fill_solid(strip5, NUM_LEDS_PER_STRIP, CRGB::Red);
-        fill_solid(strip6, NUM_LEDS_PER_STRIP, CRGB::Blue);
-        fill_solid(strip7, NUM_LEDS_PER_STRIP, CRGB::Red);
-    }
-
-    FastLED.show();
-
-//    Serial.println("Fin leds");
-}
