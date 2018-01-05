@@ -39,7 +39,7 @@
 #define DATA_PIN_STRIP7     17
 
 #define TOPIC_ALL           "shelf/all"
-#define TOPIC_LINES         "shelf/rectangle"
+#define TOPIC_RECTANGLE     "shelf/rectangle"
 #define TOPIC_MASK          "shelf/mask"
 #define TOPIC_STATE         "shelf/state"
 #define LEN_MSG_ALL         3
@@ -71,7 +71,7 @@ typedef struct msg_rect {
     uint8_t b;
 
     uint8_t first;
-    utin8_t offset;
+    uint8_t offset;
 };
 
 /*** MQTT's callback function
@@ -87,16 +87,15 @@ void callback(char *topic, byte *payload, unsigned int length);
 
 /*** update LEDs states depending on topic/payload
  *
- * @return 0 if job done
+ * @return WAIT if job done
  */
-int update(const state_t);
+void update_state(const state_t topic, const char* msg);
 
-void update_leds(void);
-int set_led(unsigned long color, unsigned int x, unsigned int y);
-int set_line(unsigned long color, unsigned int num);
-int set_column(unsigned long color, unsigned int num);
-int set_all(unsigned long color);
-int publish_state();
+void set_led(unsigned long color, unsigned int x, unsigned int y);
+void set_rectangle(unsigned long color, unsigned int num);
+void set_column(unsigned long color, unsigned int num);
+void set_all(unsigned long color);
+void publish_state();
 
 
 /*** test_leds
