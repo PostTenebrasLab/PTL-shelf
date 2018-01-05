@@ -37,6 +37,9 @@ CRGBArray<NUM_LEDS_PER_STRIP> strip5;
 CRGBArray<NUM_LEDS_PER_STRIP> strip6;
 CRGBArray<NUM_LEDS_PER_STRIP> strip7;
 
+CRGB leds[NUM_STRIPS * NUM_LEDS_PER_STRIP];
+
+
 U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /* clock=*/ 15, /* data=*/ 4, /* reset=*/ 16);
 
 WiFiClient wiFiClient;
@@ -89,8 +92,7 @@ void setup() {
             Serial.println("Subscribed to ");
 
             mqttClient.subscribe(TOPIC_ALL);
-            mqttClient.subscribe(TOPIC_LINES);
-            mqttClient.subscribe(TOPIC_COLUMNS);
+            mqttClient.subscribe(TOPIC_RECT);
             mqttClient.subscribe(TOPIC_MASK);
             mqttClient.subscribe(TOPIC_STATE);
 
@@ -102,15 +104,23 @@ void setup() {
         }
     }
 
+    FastLED.addLeds<WS2811, DATA_PIN_STRIP0>(leds, 0, NUM_LEDS_PER_STRIP);
+    FastLED.addLeds<WS2811, DATA_PIN_STRIP1>(leds, NUM_LEDS_PER_STRIP, NUM_LEDS_PER_STRIP);
+    FastLED.addLeds<WS2811, DATA_PIN_STRIP2>(leds, 2*NUM_LEDS_PER_STRIP, NUM_LEDS_PER_STRIP);
+    FastLED.addLeds<WS2811, DATA_PIN_STRIP3>(leds, 3*NUM_LEDS_PER_STRIP, NUM_LEDS_PER_STRIP);
+    FastLED.addLeds<WS2811, DATA_PIN_STRIP4>(leds, 4*NUM_LEDS_PER_STRIP, NUM_LEDS_PER_STRIP);
+    FastLED.addLeds<WS2811, DATA_PIN_STRIP5>(leds, 5*NUM_LEDS_PER_STRIP, NUM_LEDS_PER_STRIP);
+    FastLED.addLeds<WS2811, DATA_PIN_STRIP6>(leds, 6*NUM_LEDS_PER_STRIP, NUM_LEDS_PER_STRIP);
+    FastLED.addLeds<WS2811, DATA_PIN_STRIP7>(leds, 7*NUM_LEDS_PER_STRIP, NUM_LEDS_PER_STRIP);
 
-    FastLED.addLeds<WS2812B, DATA_PIN_STRIP0, RGB>(strip0, NUM_LEDS_PER_STRIP);
-    FastLED.addLeds<WS2812B, DATA_PIN_STRIP1, RGB>(strip1, NUM_LEDS_PER_STRIP);
-    FastLED.addLeds<WS2812B, DATA_PIN_STRIP2, RGB>(strip2, NUM_LEDS_PER_STRIP);
-    FastLED.addLeds<WS2812B, DATA_PIN_STRIP3, RGB>(strip3, NUM_LEDS_PER_STRIP);
-    FastLED.addLeds<WS2812B, DATA_PIN_STRIP4, RGB>(strip4, NUM_LEDS_PER_STRIP);
-    FastLED.addLeds<WS2812B, DATA_PIN_STRIP5, RGB>(strip5, NUM_LEDS_PER_STRIP);
-    FastLED.addLeds<WS2812B, DATA_PIN_STRIP6, RGB>(strip6, NUM_LEDS_PER_STRIP);
-    FastLED.addLeds<WS2812B, DATA_PIN_STRIP7, RGB>(strip7, NUM_LEDS_PER_STRIP);
+//    FastLED.addLeds<WS2811, DATA_PIN_STRIP0, RGB>(strip0, NUM_LEDS_PER_STRIP);
+//    FastLED.addLeds<WS2811, DATA_PIN_STRIP1, RGB>(strip1, NUM_LEDS_PER_STRIP);
+//    FastLED.addLeds<WS2811, DATA_PIN_STRIP2, RGB>(strip2, NUM_LEDS_PER_STRIP);
+//    FastLED.addLeds<WS2811, DATA_PIN_STRIP3, RGB>(strip3, NUM_LEDS_PER_STRIP);
+//    FastLED.addLeds<WS2811, DATA_PIN_STRIP4, RGB>(strip4, NUM_LEDS_PER_STRIP);
+//    FastLED.addLeds<WS2811, DATA_PIN_STRIP5, RGB>(strip5, NUM_LEDS_PER_STRIP);
+//    FastLED.addLeds<WS2811, DATA_PIN_STRIP6, RGB>(strip6, NUM_LEDS_PER_STRIP);
+//    FastLED.addLeds<WS2811, DATA_PIN_STRIP7, RGB>(strip7, NUM_LEDS_PER_STRIP);
 }
 
 void loop() {
@@ -120,7 +130,7 @@ void loop() {
     mqttClient.loop();
 
     e = update_state(state, buffer);
-    if(e == 0)
+    if (e == 0)
         update_leds();
 
 //    test_leds();

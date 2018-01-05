@@ -39,18 +39,16 @@
 #define DATA_PIN_STRIP7     17
 
 #define TOPIC_ALL           "shelf/all"
-#define TOPIC_LINES         "shelf/lines"
-#define TOPIC_COLUMNS       "shelf/columns"
+#define TOPIC_LINES         "shelf/rectangle"
 #define TOPIC_MASK          "shelf/mask"
 #define TOPIC_STATE         "shelf/state"
-#define LEN_MSG_ALL         10
-#define LEN_MSG_LINES       10
-#define LEN_MSG_COLUMNS     10
-#define LEN_MSG_MASK        10
+#define LEN_MSG_ALL         3
+#define LEN_MSG_RECTANGLE   5
+#define LEN_MSG_MASK        19
 
 enum {STRIP0 = 0, STRIP1, STRIP2, STRIP3, STRIP4, STRIP5, STRIP6, STRIP7};
 enum {LED0 = 0, LED1, LED2, LED3, LED4, LED5, LED6, LED7, LED8, LED9, LED10, LED11, LED12, LED13, LED14, LED15};
-typedef enum {WAIT, ALL, LINES, COLUMNS, MASK, STATE} state_t;
+typedef enum {WAIT, ALL, RECTANGLE, MASK, STATE} state_t;
 
 typedef struct ledshelf {
     uint8_t r;
@@ -67,7 +65,14 @@ typedef struct ledshelf {
 
 } ledshelf_st;
 
+typedef struct msg_rect {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
 
+    uint8_t first;
+    utin8_t offset;
+};
 
 /*** MQTT's callback function
  *

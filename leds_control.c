@@ -33,13 +33,8 @@ void callback(char *topic, byte *payload, unsigned int length) {
         state = ALL;
     }
 
-    if (strcmp(topic,TOPIC_LINES)==0 && length == LEN_MSG_LINES) {
-        state = LINES;
-    }
-
-    if (strcmp(topic,TOPIC_COLUMNS)==0) {
-        state = COLUMNS;
-//        goto end_callback;
+    if (strcmp(topic,TOPIC_RECTANGLE)==0 && length == LEN_MSG_LINES) {
+        state = RECTANGLE;
     }
 
     if (strcmp(topic,TOPIC_MASK)==0) {
@@ -76,11 +71,8 @@ int update_state(const state_t topic, const char* msg) {
         case ALL:
             err = set_all(3);
             goto done;
-        case LINES:
+        case RECTANGLE:
             err = set_lines();
-            goto done;
-        case COLUMNS:
-            err = set_columns();
             goto done;
         case MASK:
             err = set_leds();
@@ -104,9 +96,27 @@ int update_state(const state_t topic, const char* msg) {
 
 void update_leds(void) {
 
-//    FastLED.show();
+    FastLED.show();
 }
 
+void set_rect(int first_corner, int offset ){
+
+
+
+    uint8_t x0 = first_corner >> 4;
+    uint8_t y0 = first_corner & 0xf;
+
+    uint8_t x1 = x0 + offset >> 4;
+    uint8_t y1 = y0 + offset & 0xf;
+
+    for(int j = y0; j < y1; j++){
+        for(int i = x0; i < x1; i++){
+
+
+        }
+
+    }
+}
 //void test_leds() {
 //
 //    long ms = millis() % 2000;
